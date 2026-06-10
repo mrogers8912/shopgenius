@@ -72,12 +72,20 @@ export class AuthService {
     const tokenUrl = `https://${shop}/admin/oauth/access_token`;
 
     const response = await axios.post(tokenUrl, {
-      client_id: this.apiKey,
-      client_secret: this.apiSecret,
-      code,
-    });
+    client_id: this.apiKey,
+    client_secret: this.apiSecret,
+    code,
+});
 
-    const accessToken = response.data.access_token;
+// Fix TypeScript "unknown" type
+    const data: any = response.data;
+    const accessToken = data.access_token;
+
+// Save session
+this.sessions[shop].accessToken = accessToken;
+
+console.log(`Shop ${shop} installed. Token saved.`);
+
 
     // Save session
     this.sessions[shop].accessToken = accessToken;
