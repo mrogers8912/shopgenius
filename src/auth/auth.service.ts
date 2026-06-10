@@ -4,12 +4,12 @@ import axios from 'axios';
 
 @Injectable()
 export class AuthService {
-  private apiKey = process.env.SHOPIFY_API_KEY;
-  private apiSecret = process.env.SHOPIFY_API_SECRET;
-  private appUrl = process.env.APP_URL;
+  private apiKey = process.env.SHOPIFY_API_KEY ?? '';
+  private apiSecret = process.env.SHOPIFY_API_SECRET ?? '';
+  private appUrl = process.env.APP_URL ?? '';
 
   // Temporary in‑memory session store
-  private sessions = {};
+  private sessions: Record<string, any> = {};
 
   // Step 1: Redirect merchant to Shopify install screen
   async beginAuth(req): Promise<string> {
@@ -20,7 +20,6 @@ export class AuthService {
     }
 
     const state = crypto.randomBytes(16).toString('hex');
-
     const redirectUri = `${this.appUrl}/auth/callback`;
 
     const installUrl =
@@ -72,20 +71,14 @@ export class AuthService {
     const tokenUrl = `https://${shop}/admin/oauth/access_token`;
 
     const response = await axios.post(tokenUrl, {
-    client_id: this.apiKey,
-    client_secret: this.apiSecret,
-    code,
-});
+      client_id: this.apiKey,
+      client_secret: this.apiSecret,
+      code,
+    });
 
-// Fix TypeScript "unknown" type
+    // Fix TypeScript "unknown" type
     const data: any = response.data;
     const accessToken = data.access_token;
-
-// Save session
-this.sessions[shop].accessToken = accessToken;
-
-console.log(`Shop ${shop} installed. Token saved.`);
-
 
     // Save session
     this.sessions[shop].accessToken = accessToken;
